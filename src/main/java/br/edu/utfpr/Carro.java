@@ -8,4 +8,4 @@ public record Carro(
         int ano,
         String cambio,
         String tipo
-) implements Serializable {}
+){}

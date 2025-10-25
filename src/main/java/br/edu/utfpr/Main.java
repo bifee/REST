@@ -1,20 +1,15 @@
 package br.edu.utfpr;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 import java.rmi.RemoteException;
 import java.util.Scanner;
-
+@SpringBootApplication
 public class Main {
-    public static void main(String[] args) throws RemoteException{
-        DB db = new DB();
-        RMIServer server = new RMIServer(db);
-        RMIClient client = new RMIClient();
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Selecione tipo de inicializacao: S - Servidor, C - Cliente");
-        String tipo = sc.nextLine().toUpperCase().trim();
-        switch (tipo){
-            case "C" -> client.start();
-            case "S"  -> server.start();
-            default -> System.out.println("opcao invalida");
-        }
+    public static void main(String[] args){
+        System.setProperty("server.port", "9090");
+        SpringApplication.run(Main.class, args);
+        System.out.println("Servidor REST iniciado em http://localhost:8080");
     }
 }

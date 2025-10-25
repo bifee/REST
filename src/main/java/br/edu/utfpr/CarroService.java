@@ -1,20 +1,21 @@
 package br.edu.utfpr;
 
+import org.springframework.stereotype.Service;
+
 import java.io.Serializable;
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DB extends UnicastRemoteObject implements ObjectCRUD{
+@Service
+public class CarroService {
     private static final String URL = "jdbc:sqlite:teste.db";
 
-    public DB() throws RemoteException {
+    public CarroService(){
         initializeDB();
     }
 
-    public void initializeDB() throws RemoteException {
+    public void initializeDB(){
         String sql = "CREATE TABLE IF NOT EXISTS carros(" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "marca TEXT NOT NULL," +
@@ -30,7 +31,7 @@ public class DB extends UnicastRemoteObject implements ObjectCRUD{
         }
     }
 
-    public void insert(Carro carro) throws RemoteException  {
+    public void insert(Carro carro){
         String sql = "INSERT INTO carros(marca, modelo, ano, cambio, tipo) VALUES(?,?,?,?,?)";
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -49,7 +50,7 @@ public class DB extends UnicastRemoteObject implements ObjectCRUD{
         }
     }
 
-    public CarroComId read(int id)  throws RemoteException {
+    public CarroComId read(int id){
         String sql = "SELECT * FROM carros WHERE id = ?";
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -73,7 +74,7 @@ public class DB extends UnicastRemoteObject implements ObjectCRUD{
         return null;
     }
 
-    public List<CarroComId> listAll()  throws RemoteException {
+    public List<CarroComId> listAll(){
         List<CarroComId> lista = new ArrayList<>();
         String sql = "SELECT * FROM carros";
         try (Connection conn = DriverManager.getConnection(URL);
@@ -96,7 +97,7 @@ public class DB extends UnicastRemoteObject implements ObjectCRUD{
         return lista;
     }
 
-    public boolean delete(int id)  throws RemoteException {
+    public boolean delete(int id){
         String sql = "DELETE FROM carros WHERE id = ?";
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -115,24 +116,17 @@ public class DB extends UnicastRemoteObject implements ObjectCRUD{
         }
     }
 
-    public boolean update(int id, String campo, String novoValor) throws RemoteException  {
-        // Validação para evitar SQL Injection no nome do campo
-        if (!List.of("marca", "modelo", "ano", "cambio", "tipo").contains(campo)) {
-            System.err.println("ERRO: Tentativa de atualizar um campo inválido: " + campo);
-            return false;
-        }
-
-        String sql = String.format("UPDATE carros SET %s = ? WHERE id = ?", campo);
+    public boolean update(int id, Carro carro){
+        String sql = "UPDATE carros SET marca = ?, modelo = ?, ano = ?, cambio = ?, tipo = ? WHERE id = ?";
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, carro.marca());
+            pstmt.setString(2, carro.modelo());
+            pstmt.setInt(3, carro.ano());
+            pstmt.setString(4, carro.cambio());
+            pstmt.setString(5, carro.tipo());
 
-            // Se o campo for 'ano', converte para Inteiro
-            if (campo.equals("ano")) {
-                pstmt.setInt(1, Integer.parseInt(novoValor));
-            } else {
-                pstmt.setString(1, novoValor);
-            }
-            pstmt.setInt(2, id);
+            pstmt.setInt(6, id);
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException | NumberFormatException e) {
@@ -141,6 +135,4 @@ public class DB extends UnicastRemoteObject implements ObjectCRUD{
         }
     }
 
-    // Classe auxiliar para retornar o carro com seu ID
-    public record CarroComId(int id, Carro carro) implements Serializable{}
 }
