@@ -104,10 +104,8 @@ public class CarroService {
             pstmt.setInt(1, id);
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
-                System.out.printf("DB: Successfully deleted item with id: %s%n", id);
                 return true;
             } else {
-                System.out.printf("DB Warning: Delete did not affect any rows for item id: %s%n", id);
                 return false;
             }
         } catch (SQLException e) {
