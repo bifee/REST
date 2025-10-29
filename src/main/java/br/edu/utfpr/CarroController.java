@@ -27,8 +27,16 @@ public class CarroController {
     }
 
     @PostMapping
-    public void insert(@RequestBody Carro carro){
+    public ResponseEntity<Void> insert(@RequestBody Carro carro){
+        if (carro.marca() == null || carro.marca().trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (carro.ano() < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
         carroService.insert(carro);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
@@ -40,6 +48,12 @@ public class CarroController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> update(@PathVariable("id") int id, @RequestBody Carro carro){
+        if (carro.marca() == null || carro.marca().trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (carro.ano() < 0) {
+            return ResponseEntity.badRequest().build();
+        }
         if(carroService.update(id, carro)){
             return ResponseEntity.ok().build();
         } else return ResponseEntity.notFound().build();
